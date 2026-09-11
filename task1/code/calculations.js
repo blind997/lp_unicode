@@ -160,7 +160,7 @@ function getCustomer(customerId)
                     const customer= customers.find(cust=> cust.id==customerId);
 
                     if(!customer){
-                        reject(new Error("not found"));
+                        reject(new CustomerNotFoundError("not found"));
                         return;
                     }
                     resolve(customer);
@@ -197,13 +197,13 @@ function getCustomerc(customerId,callback){
 function getProducts(productId){
     const promise= new Promise((resolve, reject)=>{
         setTimeout(()=>{
-            const product=products.find((pro)=>pro.id==productId);
+            const product=products.find((pro)=>pro.id==productId)
 
             if(!product){
-                reject(new Error("product not found"));
+               reject(new ProductNotFoundError("Product not found"))
             return;
             }
-            resolve(product);
+            resolve(product)
         },1500)
     })
     return promise;
@@ -404,3 +404,78 @@ function createOrder(order){
         },1000)
     });
 }
+getCustomer(order.customerId).then(customer=>{
+    console.log("customer:",customer);
+ return Promise.all(
+            order.items.map(item => getProducts(item.productId))
+        );
+    })
+    .then(foundProducts => {
+        console.log("Products:", foundProducts);
+
+        return checkStock(order.items);
+    })
+    .then(stock => {
+        console.log("Stock:", stock);
+
+        return processPayment(order);
+    })
+    .then(payment => {
+        console.log("Payment:", payment);
+
+        return createOrder(order);
+    })
+    .then(createdOrder => {
+        console.log("Order created:", createdOrder);
+    })
+    .catch(error => {
+        console.log("ERROR:", error.message);
+});
+
+
+async function processorder(orderId){
+    try{
+    const order=orders.find(order=>order.id==orderId);
+    if(!order){
+        throw new Error("Invalid orderId");
+        }
+        const customer= await getCustomer(order.customerId);
+            
+        const foundProducts=await Promise.all(
+            order.items.map(item=>getProducts(item.productId))
+        );
+       
+        const availStock=await checkStock(order.items)
+        if(!availStock){
+            throw new Error("Insufficient stock");
+        }
+        const payment= await processPayment(order);
+        const orderMake=await createOrder(order);
+        console.log(orderMake);
+
+    }
+    catch(error){
+        console.log(error.name+ " " +error.message);
+    }
+    finally{
+        console.log("order processed thorugh async await ");
+    }
+}
+class CustomerNotFoundError extends Error{
+    constructor(message){
+        super(message);
+        this.name="Customernotfounderror"
+    }
+
+}
+class ProductNotFoundError extends Error{
+    constructor(message){
+        super(message);
+        this.name="Productnotfound";
+
+    }
+}
+
+
+
+processorder(9999);
