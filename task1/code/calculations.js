@@ -59,13 +59,13 @@ function getOrdersByCustomer(customerId){
     return customerorders;
 
 }
-// for (const order of orders){
-// console.log(generateOrderSummary(order));
-// }
-// orders.forEach(order => {
-//     console.log(generateOrderSummary(order));
+for (const order of orders){
+console.log(generateOrderSummary(order));
+}
+orders.forEach(order => {
+    console.log(generateOrderSummary(order));
     
-// });
+});
 function getAllOrderTotals(){
     const orderTotal=orders.map(order =>{
         const subtotal= calculateSubtotal(order);
@@ -336,65 +336,65 @@ function createordercall(order,callback){
 }
 const order = orders.find(order => order.id === 1002);
 
-getCustomerc(order.customerId, (error, customer) => {
+// getCustomerc(order.customerId, (error, customer) => {
 
-    if (error) {
-        console.log(error.message);
-        return;
-    }
+//     if (error) {
+//         console.log(error.message);
+//         return;
+//     }
 
-    console.log("Customer found:", customer);
+//     console.log("Customer found:", customer);
 
-    let completed = 0;
+//     let completed = 0;
 
-    for (const item of order.items) {
+//     for (const item of order.items) {
 
-        getProductsc(item.productId, (error, product) => {
+//         getProductsc(item.productId, (error, product) => {
 
-            if (error) {
-                console.log(error.message);
-                return;
-            }
+//             if (error) {
+//                 console.log(error.message);
+//                 return;
+//             }
 
-            console.log("Product found:", product);
+//             console.log("Product found:", product);
 
-            completed++;
+//             completed++;
 
-            if (completed === order.items.length) {
+//             if (completed === order.items.length) {
 
-                checkStockc(order.items, (error, stock) => {
+//                 checkStockc(order.items, (error, stock) => {
 
-                    if (error) {
-                        console.log(error.message);
-                        return;
-                    }
+//                     if (error) {
+//                         console.log(error.message);
+//                         return;
+//                     }
 
-                    console.log("Stock available:", stock);
+//                     console.log("Stock available:", stock);
 
-                    processPaymentc(order, (error, payment) => {
+//                     processPaymentc(order, (error, payment) => {
 
-                        if (error) {
-                            console.log(error.message);
-                            return;
-                        }
+//                         if (error) {
+//                             console.log(error.message);
+//                             return;
+//                         }
 
-                        console.log("Payment successful:", payment);
+//                         console.log("Payment successful:", payment);
 
-                        createordercall(order, (error, createdOrder) => {
+//                         createordercall(order, (error, createdOrder) => {
 
-                            if (error) {
-                                console.log(error.message);
-                                return;
-                            }
+//                             if (error) {
+//                                 console.log(error.message);
+//                                 return;
+//                             }
 
-                            console.log("Order created:", createdOrder);
-                        });
-                    });
-                });
-            }
-        });
-    }
-});
+//                             console.log("Order created:", createdOrder);
+//                         });
+//                     });
+//                 });
+//             }
+//         });
+//     }
+// });
 
 
 function createOrder(order){
@@ -404,78 +404,78 @@ function createOrder(order){
         },1000)
     });
 }
-getCustomer(order.customerId).then(customer=>{
-    console.log("customer:",customer);
- return Promise.all(
-            order.items.map(item => getProducts(item.productId))
-        );
-    })
-    .then(foundProducts => {
-        console.log("Products:", foundProducts);
+// getCustomer(order.customerId).then(customer=>{
+//     console.log("customer:",customer);
+//  return Promise.all(
+//             order.items.map(item => getProducts(item.productId))
+//         );
+//     })
+//     .then(foundProducts => {
+//         console.log("Products:", foundProducts);
 
-        return checkStock(order.items);
-    })
-    .then(stock => {
-        console.log("Stock:", stock);
+//         return checkStock(order.items);
+//     })
+//     .then(stock => {
+//         console.log("Stock:", stock);
 
-        return processPayment(order);
-    })
-    .then(payment => {
-        console.log("Payment:", payment);
+//         return processPayment(order);
+//     })
+//     .then(payment => {
+//         console.log("Payment:", payment);
 
-        return createOrder(order);
-    })
-    .then(createdOrder => {
-        console.log("Order created:", createdOrder);
-    })
-    .catch(error => {
-        console.log("ERROR:", error.message);
-});
+//         return createOrder(order);
+//     })
+//     .then(createdOrder => {
+//         console.log("Order created:", createdOrder);
+//     })
+//     .catch(error => {
+//         console.log("ERROR:", error.message);
+// });
 
 
-async function processorder(orderId){
-    try{
-    const order=orders.find(order=>order.id==orderId);
-    if(!order){
-        throw new Error("Invalid orderId");
-        }
-        const customer= await getCustomer(order.customerId);
+// async function processorder(orderId){
+//     try{
+//     const order=orders.find(order=>order.id==orderId);
+//     if(!order){
+//         throw new Error("Invalid orderId");
+//         }
+//         const customer= await getCustomer(order.customerId);
             
-        const foundProducts=await Promise.all(
-            order.items.map(item=>getProducts(item.productId))
-        );
+//         const foundProducts=await Promise.all(
+//             order.items.map(item=>getProducts(item.productId))
+//         );
        
-        const availStock=await checkStock(order.items)
-        if(!availStock){
-            throw new Error("Insufficient stock");
-        }
-        const payment= await processPayment(order);
-        const orderMake=await createOrder(order);
-        console.log(orderMake);
+//         const availStock=await checkStock(order.items)
+//         if(!availStock){
+//             throw new Error("Insufficient stock");
+//         }
+//         const payment= await processPayment(order);
+//         const orderMake=await createOrder(order);
+//         console.log(orderMake);
 
-    }
-    catch(error){
-        console.log(error.name+ " " +error.message);
-    }
-    finally{
-        console.log("order processed thorugh async await ");
-    }
-}
-class CustomerNotFoundError extends Error{
-    constructor(message){
-        super(message);
-        this.name="Customernotfounderror"
-    }
+//     }
+//     catch(error){
+//         console.log(error.name+ " " +error.message);
+//     }
+//     finally{
+//         console.log("order processed thorugh async await ");
+//     }
+// }
+// class CustomerNotFoundError extends Error{
+//     constructor(message){
+//         super(message);
+//         this.name="Customernotfounderror"
+//     }
 
-}
-class ProductNotFoundError extends Error{
-    constructor(message){
-        super(message);
-        this.name="Productnotfound";
+// }
+// class ProductNotFoundError extends Error{
+//     constructor(message){
+//         super(message);
+//         this.name="Productnotfound";
 
-    }
-}
+//     }
+// }
 
 
 
-processorder(9999);
+// processorder(9999);
