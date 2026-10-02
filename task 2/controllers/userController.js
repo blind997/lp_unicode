@@ -70,10 +70,39 @@ const login=async(req,res)=>{
     refreshToken
 })
 };
+const refresh =(req,res) =>{
+    const {refreshToken}=req.body;
+    if (!refreshToken) {
+    return res.json({
+        message: "Refresh token required"
+    })
+    }
+    try {
+        const decode=jwt.verify(
+            refreshToken,
+            process.env.JWT_REFRESH_SECRET
+        );
+        const newAccessToken = jwt.sign(
+        { userId: decode.userId },
+        process.env.JWT_ACCESS_SECRET,
+        { expiresIn: "15m" }
+    );
+    return res.json({
+        message:"new access token",
+        accessToken:newAccessToken
+    })    
+    }
+    catch(error){
+             return res.json({
+            message: "Invalid or expired refresh token"
+        });
+    }
+}
+
 const profile = async (req, res) => {
     res.json({
         message: "authenticated",
         userId: req.userId
     });
 };
-export {login, register, profile}
+export {login, register, profile, refresh}
