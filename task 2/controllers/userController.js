@@ -1,7 +1,9 @@
 import User from "../models/User.js"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
+import sendEmail from "../config/mail.js"
 const register = async (req, res) => {
+    try{
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
@@ -22,6 +24,16 @@ const register = async (req, res) => {
         email,
         password: hashedPassword
     });
+   try {
+    await sendEmail(
+        user.email,
+        "Welcome, Account Registered",
+        `${user.name} registered`
+    );
+    } 
+    catch (error) {
+    console.log("Welcome email failed:", error.message);
+    }
     res.json({
         message:"user created succesfully",
         user:{
@@ -30,8 +42,15 @@ const register = async (req, res) => {
             email:user.email
         }
     });
+}
+    catch (error){
+        return res.json({
+            message:"somethign went wrong"
+        })
+    }
 };
 const login=async(req,res)=>{
+    try{
     const {email, password}=req.body;
     if(!email||!password){
         return res.json({
@@ -52,6 +71,16 @@ const login=async(req,res)=>{
             message:"wrong password"
         })
     }
+    try {
+    await sendEmail(
+        user.email,
+        "Login Successful",
+        `${user.name} logged in`
+    );
+    }
+     catch (error) {
+    console.log("Login email failed:", error.message);
+    }
     const accessToken=jwt.sign(
     { userId:user.id},
     process.env.JWT_ACCESS_SECRET,
@@ -69,6 +98,12 @@ const login=async(req,res)=>{
     accessToken,
     refreshToken
 })
+    }
+    catch(error){
+        return res.json({
+            message:"Something went wrong"
+        })
+    }
 };
 const refresh =(req,res) =>{
     const {refreshToken}=req.body;
